@@ -1,0 +1,20 @@
+.navbar-expand-lg.scrolled {
+    background-color: rgb(34, 31, 31) !important;
+    transition: background-color 200ms linear;
+  }
+.front {
+    overflow: hidden;
+}
+
+.img {
+    max-width: 100%;
+}
+
+.masthead {
+    height: 100vh;
+    min-height: 500px;
+    background-image: url('/images/newfront.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
