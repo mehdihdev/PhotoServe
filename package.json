@@ -9,6 +9,7 @@
   "author": "Mehdi Hussain",
   "license": "ISC",
   "dependencies": {
+    "@sentry/node": "^5.15.5",
     "bcrypt": "^4.0.1",
     "body-parser": "^1.19.0",
     "connect-flash": "^0.1.1",
@@ -20,7 +21,8 @@
     "morgan": "^1.10.0",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "signale": "^1.4.0"
   },
   "devDependencies": {
     "webpack": "^4.43.0"

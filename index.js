@@ -3,16 +3,17 @@ const app = express();
 const port = process.env.PORT || 8080;
 const mongoose = require("mongoose");
 const passport = require("passport");
+const signale = require('signale');
 const flash = require("connect-flash");
 const morgan = require("morgan");
+const Sentry = require('@sentry/node');
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const path = require("path");
-
 const User = require("./models/user.model");
 const dbConfig = require("./config/database.config");
-
+Sentry.init({ dsn: 'https://5d34f85116544e8fb06ec776f973e3a3@o195352.ingest.sentry.io/5256839' });
 // Configuration
 mongoose.connect(dbConfig.url, {
   useNewUrlParser: true
@@ -44,4 +45,4 @@ app.use(flash());
 require("./routes/routes")(app, passport, User);
 
 // Launch server
-app.listen(port, () => console.log(`server started on port ${port}`));
+app.listen(port, () => signale.success(`Server Started on Port ${port}`));

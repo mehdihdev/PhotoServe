@@ -5,6 +5,17 @@ module.exports = (app, passport, UserModel) => {
       isAuth: req.isAuthenticated(),
       user: req.user
     }));
+
+    app.get("/photos", (req, res) => res.render("photos", {
+      isAuth: req.isAuthenticated(),
+      user: req.user
+    }));
+
+    app.get("/photos/:photoID", (req, res) => res.render("photo-detail", {
+      isAuth: req.isAuthenticated(),
+      user: req.user
+    }));
+
   
     // Login
     app.get("/login", (req, res) => res.render("login", {
