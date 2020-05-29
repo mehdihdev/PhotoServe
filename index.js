@@ -6,6 +6,8 @@ const passport = require("passport");
 const signale = require('signale');
 const flash = require("connect-flash");
 const morgan = require("morgan");
+var ffmpeg = require("ffmpeg")
+const fs = require("fs")
 const Sentry = require('@sentry/node');
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
@@ -13,10 +15,12 @@ const session = require("express-session");
 const path = require("path");
 const User = require("./models/user.model");
 const dbConfig = require("./config/database.config");
+const stripe = require('stripe')('sk_test_zMLclFRUPJiYNNpVp2agy2lw00dViSI4Ob');
 Sentry.init({ dsn: 'https://5d34f85116544e8fb06ec776f973e3a3@o195352.ingest.sentry.io/5256839' });
 // Configuration
 mongoose.connect(dbConfig.url, {
-  useNewUrlParser: true
+  useNewUrlParser: true,
+  useUnifiedTopology: true
 });
 require("./config/passport.config")(passport);
 
@@ -42,7 +46,11 @@ app.use(passport.session());
 app.use(flash());
 
 // Routes
-require("./routes/routes")(app, passport, User);
+require("./routes/routes")(app, passport, User, stripe);
+
+
+
+
 
 // Launch server
 app.listen(port, () => signale.success(`Server Started on Port ${port}`));

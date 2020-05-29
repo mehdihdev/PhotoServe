@@ -1,4 +1,4 @@
-module.exports = (app, passport, UserModel) => {
+module.exports = (app, passport, UserModel, stripe) => {
 
     // Home Page
     app.get("/", (req, res) => res.render("home", {
@@ -14,12 +14,42 @@ module.exports = (app, passport, UserModel) => {
     app.get("/photos/:photoID", (req, res) => res.render("photo-detail", {
       isAuth: req.isAuthenticated(),
       user: req.user
-    }));
+      
 
+
+    }));
   
+    app.post("/charge", (req, res) => {
+      try {
+        stripe.customers
+          .create({
+            name: req.body.name,
+            email: req.body.email,
+            source: req.body.stripeToken
+          })
+          .then(customer =>
+            stripe.charges.create({
+              amount: req.body.amount * 100,
+              currency: "usd",
+              customer: customer.id
+            })
+          )
+          .then(() => res.render("completed"))
+          .catch(err => console.log(err));
+      } catch (err) {
+        res.send(err);
+      }
+    });
+
+
     // Login
     app.get("/login", (req, res) => res.render("login", {
       message: req.flash("loginMessage"),
+      isAuth: req.isAuthenticated(),
+      user: req.user
+    }));
+
+    app.get("/checkout", (req, res) => res.render("checkout", {
       isAuth: req.isAuthenticated(),
       user: req.user
     }));
