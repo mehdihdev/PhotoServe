@@ -1,4 +1,7 @@
-module.exports = (app, passport, UserModel, stripe) => {
+module.exports = (app, passport, UserModel, stripe, PhotoModel, AWS, fs) => {
+
+
+  
 
     // Home Page
     app.get("/", (req, res) => res.render("home", {
@@ -11,20 +14,27 @@ module.exports = (app, passport, UserModel, stripe) => {
       user: req.user
     }));
 
+    app.get("/upload", isLoggedIn, (req, res) => res.render("upload", {
+      isAuth: req.isAuthenticated(),
+      user: req.user
+    }));
+
+
     app.get("/photos/:photoID", (req, res) => res.render("photo-detail", {
       isAuth: req.isAuthenticated(),
       user: req.user
-      
-
-
     }));
+
+    app.post('/upload', isLoggedIn, function (req, res) {
+      uploadFile(__dirname, '/images/front.jpg');
+    });
   
-    app.post("/charge", (req, res) => {
+    app.post("/charge", isLoggedIn, (req, res) => {
       try {
         stripe.customers
           .create({
-            name: req.body.name,
-            email: req.body.email,
+            name: req.user.name,
+            email: req.user.email,
             source: req.body.stripeToken
           })
           .then(customer =>
@@ -49,7 +59,7 @@ module.exports = (app, passport, UserModel, stripe) => {
       user: req.user
     }));
 
-    app.get("/checkout", (req, res) => res.render("checkout", {
+    app.get("/checkout", isLoggedIn, (req, res) => res.render("checkout", {
       isAuth: req.isAuthenticated(),
       user: req.user
     }));
@@ -134,5 +144,28 @@ module.exports = (app, passport, UserModel, stripe) => {
     if (req.isAuthenticated())
       return next();
     // if they aren't redirect them to the home page
-    res.redirect("/");
+    res.redirect("/login");
   }
+  const fs = require("fs");
+
+  const uploadFile = (fileName) => {
+    // Read content from the file
+    const fileContent = fs.readFileSync(fileName);
+
+    // Setting up S3 upload parameters
+    const params = {
+        Bucket: BUCKET_NAME,
+        Key: 'cat.jpg', // File name you want to save as in S3
+        Body: fileContent
+    };
+
+    // Uploading files to the bucket
+    s3.upload(params, function(err, data) {
+        if (err) {
+            throw err;
+        }
+        console.log(`File uploaded successfully. ${data.Location}`);
+    });
+};
+
+  

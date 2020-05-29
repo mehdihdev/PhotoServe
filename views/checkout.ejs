@@ -10,8 +10,9 @@
               <div class="col-md-9 col-lg-8 mx-auto">
                 <h3 class="login-heading mb-4">Checkout</h3>
                 <form action="/charge" method="POST" class="">
-                    <input class="form-control m-1" type="text" name="name" placeholder="Name">
-                    <input type="email" class="form-control m-1" name="email" placeholder="Email">
+                    <label class="m-1" type="text">Name: <%= user.name %></label>
+                    <br>
+                    <label class="m-1" type="text">Email: <%= user.email %></label>
                     <input class="form-control m-1" type="text" name="amount" placeholder="Amount">
               
                     <div id="card-element" class="m-1 form-control"></div>

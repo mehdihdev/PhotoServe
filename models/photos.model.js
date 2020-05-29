@@ -1,9 +1,13 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
 const Schema = mongoose.Schema;
 
-let userSchema = new Schema({
-  imgname: String,
-  imglocation: String,
+let photoSchema = new Schema({
+  username: String,
   email: String,
+  thumbnail: String,
+  photoURL: String
 });
+
+
+
+module.exports = mongoose.model("photos", photoSchema);
