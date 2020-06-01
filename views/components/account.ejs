@@ -1,0 +1,23 @@
+<div class="container row m-3 mx-auto">
+    <img src="/images/front.jpg" style="width: 160px; height: 160px; object-fit: cover;" class="rounded-circle m-2">
+  <div class="m-2">
+    <% if (profile.alpha == "yes") { %>
+      <div class="row m-1">
+        <h1 class=""><%= profile.name %></h1> 
+        <span class="badge badge-success" style="height: 17px;">Pro</span>
+      </div>
+    
+    <% } else {%>
+      <h1 class="m-2"><%= profile.name %></h1>
+      <% } %>
+    <p class="subtitle is-6 m-2">@<%= profile.username %></p>
+    <div class="row mx-auto">
+      <% if(isRoot){ %>
+        <a class="btn btn-primary m-2" href="/edit-profile">Edit Profile</a>
+        <a class="btn btn-primary m-2" href="/upload">Upload</a>
+        <% } %>
+
+    </div>
+  </div>
+</div>
+  <hr>

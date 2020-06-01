@@ -1,6 +1,7 @@
 const express = require("express");
 const AWS = require('aws-sdk');
 var multer = require('multer');
+const fileUpload = require('express-fileupload');
 const app = express();
 const port = process.env.PORT || 8080;
 const mongoose = require("mongoose");
@@ -10,7 +11,7 @@ const flash = require("connect-flash");
 const morgan = require("morgan");
 var ffmpeg = require("ffmpeg");
 var cors = require('cors');
-const fs = require("fs");
+const fs = require("fs")
 const Sentry = require('@sentry/node');
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
@@ -26,7 +27,7 @@ mongoose.connect(dbConfig.url, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
-require("./config/passport.config")(passport);
+require("./config/passport.config")(passport, stripe);
 
 // Express setup
 app.use(morgan("dev"));
@@ -40,22 +41,6 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(__dirname + "/public"));
 
-
-//AWS S3 Setup
-const ID = 'AKIAIE2DQ4RFL3B4AUMA';
-const SECRET = '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';
-const BUCKET_NAME = 'photoserve3';
-const s3 = new AWS.S3({
-  accessKeyId: ID,
-  secretAccessKey: SECRET
-});
-
-
-
-
-
-
-
 // Passport setup
 app.use(session({
   secret: "margherita",
@@ -68,7 +53,10 @@ app.use(flash());
 
 
 // Routes
-require("./routes/routes")(app, passport, User, stripe, Photo, fs, AWS);
+require("./routes/routes")(app, passport, User, stripe, Photo, AWS, fs, signale, fileUpload);
+
+
+
 
 
 // Launch server

@@ -1,20 +1,6 @@
 <%- include('components/header') %>
-<div class="container row m-3 mx-auto">
-    <img src="/images/front.jpg" style="width: 160px; height: 160px; object-fit: cover;" class="rounded-circle m-2">
-  <div class="m-2">
-    <h1 class="m-2"><%= profile.name %></h1>
-    <p class="subtitle is-6 m-2">@<%= profile.username %></p>
-    <div class="row mx-auto">
-      <% if(isRoot){ %>
-        <button class="btn btn-primary m-2">Edit Profile</button>
-        <a class="btn btn-primary m-2" href="/upload">Upload</a>
-        <% } %>
+<%- include('components/account') %>
 
-    </div>
-
-  </div>
-</div>
-  <hr>
 
 <div class="container">
 

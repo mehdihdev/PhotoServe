@@ -7,7 +7,9 @@ let userSchema = new Schema({
   username: String,
   email: String,
   password: String,
-  avatar: String
+  avatar: String,
+  alpha: String,
+  premiumuser: String,
 });
 
 // Methods
