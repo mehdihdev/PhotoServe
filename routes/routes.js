@@ -1,25 +1,75 @@
-module.exports = (app, passport, UserModel, stripe, PhotoModel, AWS, fs, signale, multer, multerS3) => {
+module.exports = (app, passport, UserModel, stripe, PhotoModel, AWS, fs, signale, s3, path, keys, fileUpload, client) => {
   require('dotenv').config();
-  const ID = process.env.AWSID;
-  const SECRET = process.env.AWSECRET;
-  const BUCKET_NAME = 'photoserve3';
-  const s3 = new AWS.S3({
-    accessKeyId: ID,
-    secretAccessKey: SECRET
-  });
-  const uploadS3 = multer({
-    storage: multerS3({
-      s3: s3,
-      acl: 'public-read',
-      bucket: 'photoserve3',
-      metadata: (req, file, cb) => {
-        cb(null, {fieldName: file.fieldname})
-      },
-      key: (req, file, cb) => {
-        cb(null, Date.now().toString() + '-' + file.originalname)
+  var resultHandler = function(err) { 
+    if(err) {
+       console.log("unlink failed", err);
+    } else {
+       console.log("file deleted");
+    }
+  }
+
+  // Post route to handle uploading of a file
+  app.post('/upload', isLoggedIn, function(req, res) {
+    
+    // Sending error back when no files were uploaded
+    if (!req.files) {
+      return res.send('No files were uploaded.');
+    }
+  
+    // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file (this must match the HTML name attribute on the input element)
+    var sampleFile = req.files.sampleFile;
+    
+    var newFileName = Date.now() + req.files.sampleFile.name; // creating unique file name based on current time and file name of file uploaded, that way if two people upload the same file name it won't overwrite the existing file
+    
+    // Use the mv() method to place the file somewhere on your server (in this case we are placing it to the `uploads` folder with the name that we just created above, newFileName)
+    sampleFile.mv('uploads/' + newFileName, function(err) {
+      // If there was an error send that back as the response
+      if (err) {
+        return res.send(err);
       }
-    })
+  
+      // Upload to S3
+      var params = {
+        // The file on our server that we want to upload to S3
+        localFile: 'uploads/' + newFileName,
+        
+        
+        s3Params: {
+          Bucket: process.env.AWSBUCKET,
+          Key: "avatars/" + req.user.username + "/" + newFileName, // File path of location on S3
+          ACL:'public-read'
+        },
+      };
+      var uploader = client.uploadFile(params);
+
+      // On S3 error
+      uploader.on('error', function(err) {
+        // On error print the error to the console and send the error back as the response
+        console.error("unable to upload:", err.stack);
+        res.send(err.stack);
+      });
+      // On S3 success
+      uploader.on('end', function() {
+        UserModel.updateOne({ username: req.user.username }, { avatar: "https://photoserve3.s3.amazonaws.com/avatars/" + req.user.username + "/" + newFileName }, function(
+          err,
+          result
+        ) {
+          if (err) {
+            //res.send(err);
+          } else {
+            res.redirect('/profile');
+                    // Print done uploading on success
+            signale.success("done uploading");
+            // Send back a success message as the response
+            //res.send('File uploaded!');
+            //Removing file from server after uploaded to S3
+            fs.unlink('uploads/' + newFileName, resultHandler);
+              }
+            });
+      });
+    });
   });
+
   // Home Page
   app.get("/", (req, res) => res.render("home", {
     isAuth: req.isAuthenticated(),
@@ -57,30 +107,10 @@ module.exports = (app, passport, UserModel, stripe, PhotoModel, AWS, fs, signale
     user: req.user
   }));
 
-  app.post('/upload', isLoggedIn, function (req, res) {
-    //AWS S3 Setup
 
-    // Read content from the file
-    const fileContent = Buffer.from(req.files.uploadedFileName.data, 'binary');
 
-    // Setting up S3 upload parameters
-    const params = {
-      Bucket: BUCKET_NAME,
-      Key: 'cat.jpg', // File name you want to save as in S3
-      Body: fileContent
-    };
+  app.post('/upload-avatar', isLoggedIn, (req, res) => {
 
-    // Uploading files to the bucket
-    s3.upload(params, function (err, data) {
-      if (err) {
-        throw err;
-      }
-      signale.success(`File uploaded successfully. ${data.Location}`);
-    });
-  });
-
-  app.post('/upload-avatar', isLoggedIn, uploadS3.single('file'), (req, res) => {
-    console.log(req.body.file);
   });
 
   app.post("/charge", isLoggedIn, (req, res) => {

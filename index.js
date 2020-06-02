@@ -1,7 +1,6 @@
 const express = require("express");
 const AWS = require('aws-sdk');
-var multer = require('multer');
-const multerS3 = require('multer-s3');
+var s3 = require('s3');
 const fileUpload = require('express-fileupload');
 const app = express();
 const port = process.env.PORT || 8080;
@@ -19,6 +18,7 @@ const bodyParser = require("body-parser");
 const session = require("express-session");
 const path = require("path");
 const User = require("./models/user.model");
+var keys = require('./config/keys');
 const Photo = require("./models/photos.model");
 const dbConfig = require("./config/database.config");
 const stripe = require('stripe')('sk_test_zMLclFRUPJiYNNpVp2agy2lw00dViSI4Ob');
@@ -45,6 +45,27 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(__dirname + "/public"));
 
+// Creating S3 client
+var client = s3.createClient({
+	maxAsyncS3: 20, // this is the default 
+	s3RetryCount: 3, // this is the default 
+	s3RetryDelay: 1000, // this is the default 
+	multipartUploadThreshold: 20971520, // this is the default (20 MB) 
+	multipartUploadSize: 15728640, // this is the default (15 MB) 
+	s3Options: {
+		// Using the keys from our AWS IAM user
+		accessKeyId: process.env.AWSID,
+		secretAccessKey: process.env.AWSECRET,
+		
+		// any other options are passed to new AWS.S3() 
+		// See: http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html#constructor-property 
+	},
+});
+  // This is Express.js middleware to parse and handle the files we upload from our HTML page
+  app.use(fileUpload());
+
+
+
 // Passport setup
 app.use(session({
   secret: "margherita",
@@ -55,7 +76,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 // Routes
-require("./routes/routes")(app, passport, User, stripe, Photo, AWS, fs, signale, multer, multerS3);
+require("./routes/routes")(app, passport, User, stripe, Photo, AWS, fs, signale, path, fileUpload, s3, keys, client);
 
 // Launch server
 app.listen(port, () => signale.success(`Server Started on Port ${port}`));

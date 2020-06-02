@@ -1,6 +1,4 @@
 const LocalStategy = require("passport-local").Strategy;
-var mixpanel = require('mixpanel-browser');
-mixpanel.init("a325819221b5aff534fc0caa5dff7892");
 const User = require("../models/user.model");
 
 module.exports = passport => {
@@ -19,6 +17,7 @@ module.exports = passport => {
       email: req.body.email,
       alpha: "no",
       premiumuser: "no",
+      avatar: "https://photoserve3.s3.amazonaws.com/avatars/default/default.png",
     });
 
     newUser.password = newUser.generateHash(password);
@@ -47,4 +46,8 @@ module.exports = passport => {
       return done(null, user);
     });
   }));
+
+
+
+
 };

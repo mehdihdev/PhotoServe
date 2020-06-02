@@ -1,7 +1,7 @@
 <%- include('components/header') %>
 
 <div class="container row m-3 mx-auto">
-    <img src="/images/front.jpg" style="width: 160px; height: 160px; object-fit: cover;" class="rounded-circle m-2">
+    <img src="<%= user.avatar %>" style="width: 160px; height: 160px; object-fit: cover;" class="rounded-circle m-2">
   <div class="m-2">
     <h1 class="m-2"><%= user.name %></h1>
     <p class="subtitle is-6 m-2">@<%= user.username %></p>
