@@ -1,5 +1,6 @@
 const LocalStategy = require("passport-local").Strategy;
-
+var mixpanel = require('mixpanel-browser');
+mixpanel.init("a325819221b5aff534fc0caa5dff7892");
 const User = require("../models/user.model");
 
 module.exports = passport => {
@@ -19,6 +20,7 @@ module.exports = passport => {
       alpha: "no",
       premiumuser: "no",
     });
+
     newUser.password = newUser.generateHash(password);
     newUser.save(err => {
       if (err) throw err;

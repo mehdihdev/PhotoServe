@@ -1,5 +1,25 @@
-module.exports = (app, passport, UserModel, stripe, PhotoModel, AWS, fs, signale, fileUpload) => {
-
+module.exports = (app, passport, UserModel, stripe, PhotoModel, AWS, fs, signale, multer, multerS3) => {
+  require('dotenv').config();
+  const ID = process.env.AWSID;
+  const SECRET = process.env.AWSECRET;
+  const BUCKET_NAME = 'photoserve3';
+  const s3 = new AWS.S3({
+    accessKeyId: ID,
+    secretAccessKey: SECRET
+  });
+  const uploadS3 = multer({
+    storage: multerS3({
+      s3: s3,
+      acl: 'public-read',
+      bucket: 'photoserve3',
+      metadata: (req, file, cb) => {
+        cb(null, {fieldName: file.fieldname})
+      },
+      key: (req, file, cb) => {
+        cb(null, Date.now().toString() + '-' + file.originalname)
+      }
+    })
+  });
   // Home Page
   app.get("/", (req, res) => res.render("home", {
     isAuth: req.isAuthenticated(),
@@ -39,13 +59,7 @@ module.exports = (app, passport, UserModel, stripe, PhotoModel, AWS, fs, signale
 
   app.post('/upload', isLoggedIn, function (req, res) {
     //AWS S3 Setup
-    const ID = 'AKIAIHCJPCJHTHVQKEPA';
-    const SECRET = '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';
-    const BUCKET_NAME = 'photoserve3';
-    const s3 = new AWS.S3({
-      accessKeyId: ID,
-      secretAccessKey: SECRET
-    });
+
     // Read content from the file
     const fileContent = Buffer.from(req.files.uploadedFileName.data, 'binary');
 
@@ -65,33 +79,8 @@ module.exports = (app, passport, UserModel, stripe, PhotoModel, AWS, fs, signale
     });
   });
 
-  app.post('/upload-avatar', isLoggedIn, function (req, res) {
-    //AWS S3 Setup
-    const ID = 'AKIAIHCJPCJHTHVQKEPA';
-    const SECRET = '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';
-    const BUCKET_NAME = 'photoserve3';
-    const s3 = new AWS.S3({
-      accessKeyId: ID,
-      secretAccessKey: SECRET
-    });
-    // Read content from the file
-    //signale.watch(req.body.files)
-    const fileContent = Buffer.from(req.file, 'binary');
-
-    // Setting up S3 upload parameters
-    const params = {
-      Bucket: BUCKET_NAME,
-      Key: `avatars/${req.user.username}/avatar.jpg`, // File name in S3
-      Body: fileContent
-    };
-
-    // Uploading files to the bucket
-    s3.upload(params, function (err, data) {
-      if (err) {
-        throw err;
-      }
-      signale.success(`File uploaded successfully. ${data.Location}`);
-    });
+  app.post('/upload-avatar', isLoggedIn, uploadS3.single('file'), (req, res) => {
+    console.log(req.body.file);
   });
 
   app.post("/charge", isLoggedIn, (req, res) => {

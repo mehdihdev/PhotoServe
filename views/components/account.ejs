@@ -2,11 +2,10 @@
     <img src="/images/front.jpg" style="width: 160px; height: 160px; object-fit: cover;" class="rounded-circle m-2">
   <div class="m-2">
     <% if (profile.alpha == "yes") { %>
-      <div class="row m-1">
+      <div class="row account">
         <h1 class=""><%= profile.name %></h1> 
         <span class="badge badge-success" style="height: 17px;">Pro</span>
       </div>
-    
     <% } else {%>
       <h1 class="m-2"><%= profile.name %></h1>
       <% } %>

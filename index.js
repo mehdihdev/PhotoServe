@@ -1,6 +1,7 @@
 const express = require("express");
 const AWS = require('aws-sdk');
 var multer = require('multer');
+const multerS3 = require('multer-s3');
 const fileUpload = require('express-fileupload');
 const app = express();
 const port = process.env.PORT || 8080;
@@ -22,12 +23,15 @@ const Photo = require("./models/photos.model");
 const dbConfig = require("./config/database.config");
 const stripe = require('stripe')('sk_test_zMLclFRUPJiYNNpVp2agy2lw00dViSI4Ob');
 Sentry.init({ dsn: 'https://5d34f85116544e8fb06ec776f973e3a3@o195352.ingest.sentry.io/5256839' });
+var mixpanel = require('mixpanel-browser');
+require('dotenv').config();
+mixpanel.init("a325819221b5aff534fc0caa5dff7892");
 // Configuration
 mongoose.connect(dbConfig.url, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
-require("./config/passport.config")(passport, stripe);
+require("./config/passport.config")(passport, stripe, mixpanel);
 
 // Express setup
 app.use(morgan("dev"));
@@ -50,14 +54,8 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
-
-
 // Routes
-require("./routes/routes")(app, passport, User, stripe, Photo, AWS, fs, signale, fileUpload);
-
-
-
-
+require("./routes/routes")(app, passport, User, stripe, Photo, AWS, fs, signale, multer, multerS3);
 
 // Launch server
 app.listen(port, () => signale.success(`Server Started on Port ${port}`));

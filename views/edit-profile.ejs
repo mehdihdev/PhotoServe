@@ -16,13 +16,26 @@
   <h1 class="m-2">Edit Profile</h1>
 
 <form action="/upload-avatar" method="POST" enctype="multipart/form-data">
-    <input type="file" class="btn btn-primary" name="image" id="image">
-
+    <!--<input type="file" class="btn btn-primary" name="image" id="image">-->
+    <input type="file" :accept="allowedMimes" ref="inputFile" @change="onChange"/>
 
 <button class="btn btn-primary" type="submit">Upload</button>
 <script src="/js/upload.js"></script>
 
 </form>
+
+<script>
+    function onChange() {
+  const data = new FormData();
+  for (const [key, value] of Object.entries(this.options)) {
+    data.append(key, value);
+  }
+
+  const file = this.$refs.inputFile.files[0];
+  data.append('file', fileToUpload, file.name);
+  const {data: res} = await axios.post(API`/upload-avatar`, data);
+}
+</script>
 
 
 
